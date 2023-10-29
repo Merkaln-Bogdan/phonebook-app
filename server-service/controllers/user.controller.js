@@ -18,7 +18,7 @@ module.exports = class UserControllers {
       if (existingUser) {
         return res
           .status(409)
-          .send("Користувач з таким email вже існує!");
+          .send("A user with this email already exists!");
       }
 
       const user = await usersModel.create({

@@ -2,6 +2,8 @@ const { Router } = require("express");
 const contactsRouter = Router();
 const contactControllers = require("../controllers/contact.controller");
 const userController = require("../controllers/user.controller");
+const ImageControllers = require("../imageController/imageController");
+const { upload } = require("../imageController/imageController");
 
 contactsRouter.get(
   "/",
@@ -28,6 +30,12 @@ contactsRouter.patch(
   contactControllers.validateUpdateContact,
   contactControllers.validateId,
   contactControllers.updateContacts
+);
+
+contactsRouter.post(
+  "/:contactId/upload-photo",
+  upload.single("profile"),
+  ImageControllers.updateContactImage
 );
 
 module.exports = contactsRouter;

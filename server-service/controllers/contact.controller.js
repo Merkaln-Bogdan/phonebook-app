@@ -1,16 +1,13 @@
-const bcriptjs = require("bcrypt");
 const Joi = require("joi");
 const contactsModel = require("../models/contacts.model");
-const jwt = require("jsonwebtoken");
+
 const {
   Types: { ObjectId },
 } = require("mongoose");
+const ImageControllers = require("../imageController/imagemin");
 // const { static } = require('express');
 
 module.exports = class ContactsControllers {
-  constructor() {
-    this._consFactor = 4;
-  }
 
   static async getListContacts(req, res, next) {
     try {
@@ -139,9 +136,11 @@ module.exports = class ContactsControllers {
 
   static validateId(req, res, next) {
     const { contactId } = req.params;
+ 
     if (!ObjectId.isValid(contactId)) {
       res.status(400).send();
     }
     next();
   }
+
 };

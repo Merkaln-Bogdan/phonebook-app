@@ -1,7 +1,8 @@
 const { Router } = require("express");
 const usersRouter = Router();
 const userController = require("../controllers/user.controller");
-const { upload } = require("../imageController/imagemin");
+const ImageControllers = require("../imageController/imageController");
+const { upload } = require("../imageController/imageController");
 
 usersRouter.post(
   "/auth/register",
@@ -27,7 +28,7 @@ usersRouter.patch(
   "/auth/avatar",
   userController.authorize,
   upload.single("avatar"),
-  userController.createUserAvatar
+  ImageControllers.updateUserAvatar
 );
 usersRouter.get("/auth/verify/:verificationToken", userController.verifyEmail);
 module.exports = usersRouter;
