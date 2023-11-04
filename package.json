@@ -4,6 +4,7 @@
   "description": "\"back-part of phonebook app\"",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js --build-from-source",
     "test": "dev",
     "dev": "nodemon index"
   },
