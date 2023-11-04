@@ -9,7 +9,6 @@ const contactSchema = new Schema({
   profession: { type: String, required: false },
   image: { type: Schema.Types.Mixed, required: false },
   gender: { type: String, required: true },
-
 });
 async function findContactByIdAndUpdate(contactId, updateParams) {
   return this.findByIdAndUpdate(
