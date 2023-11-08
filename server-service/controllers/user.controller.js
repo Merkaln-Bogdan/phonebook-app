@@ -14,7 +14,8 @@ module.exports = class UserControllers {
       const { password, email } = req.body;
 
       const passwordHash = await bcriptjs.hash(password, _constFactor);
-      const existingUser = await usersModel.findByEmail(email);
+      const existingUser = await usersModel.findByEmail(email)
+
       if (existingUser) {
         return res
           .status(409)
@@ -62,22 +63,23 @@ module.exports = class UserControllers {
   static async signIn(req, res, next) {
     try {
       const { email, password } = req.body;
+      
       const user = await usersModel.findByEmail(email);
-      if (!user) {
-        return res.status(401).send("Authorization failed! Wrong email!");
-      }
+
       const isPasswordValid = await bcriptjs.compare(password, user.password);
+
       if (!isPasswordValid) {
-        return res
-          .status(401)
-          .send("Authorization failed! Pasword is not valid!");
+        throw new UnauthorizedError("Not authorized!");
       }
+
       const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: 2 * 24 * 60 * 60,
       });
+  
       await usersModel.updateToken(user._id, token);
+
       return res.status(200).json({ token });
-    } catch (err) {
+    }catch (err) {
       next(err);
     }
   }
@@ -124,12 +126,13 @@ module.exports = class UserControllers {
       try {
         userId = await jwt.verify(token, process.env.JWT_SECRET).id;
       } catch (err) {
-        next(new UnauthorizedError("User not authorized"));
+        next(new UnauthorizedError("You are not authorized"));
       }
 
       const user = await usersModel.findById(userId);
+      
       if (!user || user.token !== token) {
-        throw new UnauthorizedError("User not authorized!!!");
+        res.status(401).send({message: "User not authorized!!!"});
       }
       req.user = user;
       req.token = token;
