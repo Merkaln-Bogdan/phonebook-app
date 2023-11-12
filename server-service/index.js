@@ -27,7 +27,10 @@ module.exports = class UserList {
   initMiddlewares() {
     this.server.use(express.json());
     this.server.use(
-      cors({ origin: "https://merkaln-register-phonebook.netlify.app" })
+      cors({ cors: {
+        origin: ["https://merkaln-register-phonebook.netlify.app", "http://localhost:3000"],
+        default: "https://merkaln-register-phonebook.netlify.app"
+      } })
     );
     // this.server.use(express.static("static"));
   }
