@@ -29,7 +29,7 @@ module.exports = class UserList {
     this.server.use(
       cors({ origin: "https://merkaln-register-phonebook.netlify.app" })
     );
-    this.server.use(express.static("static"));
+    // this.server.use(express.static("static"));
   }
   initUserRoutes() {
     this.server.use("/api/user", usersRouter);
