@@ -66,6 +66,10 @@ module.exports = class UserControllers {
       
       const user = await usersModel.findByEmail(email);
 
+      if(!user){
+        return res.status(401).send("Not found!");
+      }
+
       const isPasswordValid = await bcriptjs.compare(password, user.password);
 
       if (!isPasswordValid) {
