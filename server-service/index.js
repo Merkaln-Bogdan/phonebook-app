@@ -13,7 +13,7 @@ module.exports = class UserList {
   async start() {
     this.initServer();
     this.initMiddlewares();
-    this.initUserRoutes();
+    // this.initUserRoutes();
     this.initContactRoutes();
     this.initLoadRoutes();
     await this.initDataBase();
@@ -28,15 +28,20 @@ module.exports = class UserList {
     this.server.use(express.json());
     this.server.use(
       cors({ cors: {
-        origin: ["https://merkaln-register-phonebook.netlify.app", "http://localhost:3000"],
+        origin: [
+          "https://merkaln-register-phonebook.netlify.app", 
+          "https://merkaln-register-phonebook.netlify.app/auth/signin", 
+          "https://phonebook-api-v2.onrender.com/auth/signin",
+          "http://localhost:3000"
+        ],
         default: "https://merkaln-register-phonebook.netlify.app"
       } })
     );
     // this.server.use(express.static("static"));
   }
-  initUserRoutes() {
-    this.server.use("/api/user", usersRouter);
-  }
+  // initUserRoutes() {
+  //   this.server.use("/api/user", usersRouter);
+  // }
   initContactRoutes() {
     this.server.use("/api/contacts", contactsRouter);
   }

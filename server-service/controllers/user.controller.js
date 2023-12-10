@@ -47,7 +47,7 @@ module.exports = class UserControllers {
   // Get current user with selective information
 
   static async getCurrentUser(req, res, next) {
-    const { _id, email, avatarURL, name, subscription } = req.user;
+    const { _id, email, avatarURL, name, subscription, lang } = req.user;
   
     res.status(200).json({
       id: _id,
@@ -55,6 +55,7 @@ module.exports = class UserControllers {
       avatarURL,
       name,
       subscription,
+      lang
     });
   }
 
@@ -134,7 +135,7 @@ module.exports = class UserControllers {
       }
 
       const user = await usersModel.findById(userId);
-      
+
       if (!user || user.token !== token) {
         res.status(401).send({message: "User not authorized!!!"});
       }
@@ -143,6 +144,24 @@ module.exports = class UserControllers {
       next();
     } catch (err) {
       throw new UnauthorizedError("Not authorized!");
+    }
+  }
+
+  static async updateUser(req, res, next){
+    try {
+      const user = await usersModel.findByIdAndUpdate(
+        req.body.id,
+        {
+          $set: req.body,
+        },
+        { new: true }
+      );
+      if (!user) {
+        return res.status(404).json({message: "user not found"});
+      }
+      return res.status(200).json(user);
+    } catch (err) {
+      next(err);
     }
   }
 

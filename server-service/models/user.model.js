@@ -10,6 +10,7 @@ const userSchema = new Schema({
     enum: ["free", "pro", "premium"],
     default: "free",
   },
+  lang: { type: String, required: false },
   token: { type: String, required: false },
   status: { type: String, enum: ["Verified", "Created"], default: "Created" },
 });
