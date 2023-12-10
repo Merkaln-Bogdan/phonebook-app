@@ -159,7 +159,14 @@ module.exports = class UserControllers {
       if (!user) {
         return res.status(404).json({message: "user not found"});
       }
-      return res.status(200).json(user);
+      return res.status(200).json({
+        id: user._id,
+        email: user.email,
+        avatarURL: user.avatarURL,
+        name: user.name,
+        subscription: user.subscription,
+        lang: user.lang
+      });
     } catch (err) {
       next(err);
     }
