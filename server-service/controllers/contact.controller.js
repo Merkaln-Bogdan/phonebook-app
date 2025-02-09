@@ -95,8 +95,6 @@ module.exports = class ContactsControllers {
   // Update contact by id controller
 
   static async updateContacts(req, res, next) {
-    console.log(req.params);
-    
     try {
       const contact = await contactsModel.findByIdAndUpdate(
         req.params.id,

@@ -1,9 +1,10 @@
 const { Router } = require("express");
 const usersRouter = Router();
-const InitController = require("../controllers/init.controller");
+const InitController = require("../controllers/init.controller")
 const userController = require("../controllers/user.controller");
 const ImageControllers = require("../imageController/imageController");
 const { upload } = require("../imageController/imageController");
+
 
 usersRouter.get("/", InitController.initInfoApp);
 

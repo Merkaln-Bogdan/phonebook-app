@@ -12,4 +12,3 @@ module.exports = {
         // measurementId: process.env.MEASUREMENT_ID
     },
 };
-

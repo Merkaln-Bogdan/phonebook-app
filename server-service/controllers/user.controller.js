@@ -104,10 +104,9 @@ module.exports = class UserControllers {
 
   static async createUserAvatar(req, res, next) {
     const { _id } = req.user;
-    console.log(_id);
     try {
       await minifyImage(req, res, next);
-      
+
       await usersModel.findOneAndUpdate(
         { _id },
         {
