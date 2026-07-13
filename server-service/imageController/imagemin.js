@@ -6,10 +6,22 @@ const { promises: fsPromises } = require("fs");
 const express = require("express");
 const { Router } = require("express");
 
-const config = require("../configs/firebaseCofig")
+const config = require("../configs/firebaseCofig");
 
-const {initializeApp} = require("firebase/app");
-const {addDoc, collection, doc, getDocs, getFirestore, query, where, documentId, setDoc, updateDoc, deleteDoc} = require("firebase/firestore");
+const { initializeApp } = require("firebase/app");
+const {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  getFirestore,
+  query,
+  where,
+  documentId,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+} = require("firebase/firestore");
 
 // Initialize Firebase
 const app = initializeApp(config.firebaseConfig);
@@ -40,7 +52,6 @@ imageRouter.use(express.static("static"));
 
 async function minifyImage(req, res, next) {
   const MINIFIED_DIR = "static";
-console.log("minify Image", req.file);
   await imagemin([req.file.path], {
     destination: MINIFIED_DIR,
     plugins: [imageminJpegtran(), imageminPngquant()],

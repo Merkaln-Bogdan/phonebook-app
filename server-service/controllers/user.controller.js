@@ -2,7 +2,7 @@ const bcriptjs = require("bcrypt");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const usersModel = require("../models/user.model");
-const { UnauthorizedError } = require("../helpers/errors.constructor");
+const AppError = require("../helpers/errors.helpers");
 const { minifyImage } = require("../imageController/imagemin");
 
 module.exports = class UserControllers {
@@ -14,12 +14,10 @@ module.exports = class UserControllers {
       const { password, email } = req.body;
 
       const passwordHash = await bcriptjs.hash(password, _constFactor);
-      const existingUser = await usersModel.findByEmail(email)
+      const existingUser = await usersModel.findByEmail(email);
 
       if (existingUser) {
-        return res
-          .status(409)
-          .send("A user with this email already exists!");
+        return res.status(409).send("A user with this email already exists!");
       }
 
       const user = await usersModel.create({
@@ -48,14 +46,14 @@ module.exports = class UserControllers {
 
   static async getCurrentUser(req, res, next) {
     const { _id, email, avatarURL, name, subscription, lang } = req.user;
-  
+
     res.status(200).json({
       id: _id,
       email,
       avatarURL,
       name,
       subscription,
-      lang
+      lang,
     });
   }
 
@@ -64,27 +62,36 @@ module.exports = class UserControllers {
   static async signIn(req, res, next) {
     try {
       const { email, password } = req.body;
-      
+
       const user = await usersModel.findByEmail(email);
 
-      if(!user){
+      if (!user) {
         return res.status(401).send("Not found!");
       }
 
       const isPasswordValid = await bcriptjs.compare(password, user.password);
 
       if (!isPasswordValid) {
-        throw new UnauthorizedError("Not authorized!");
+        return next(new AppError("Incorrect email or password!", 401));
       }
 
       const token = await jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
         expiresIn: 2 * 24 * 60 * 60,
       });
-  
+
+      res.cookie("tkn", token, {
+        expires: new Date(
+          Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+        ),
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      });
+
       await usersModel.updateToken(user._id, token);
 
       return res.status(200).json({ token });
-    }catch (err) {
+    } catch (err) {
       next(err);
     }
   }
@@ -123,32 +130,42 @@ module.exports = class UserControllers {
 
   static async authorize(req, res, next) {
     try {
-      const authorizationHeader = req.get("Authorization");
-      const token = authorizationHeader.replace("Bearer ", "");
+      let token;
+      if (req.headers.authorization?.startsWith("Bearer")) {
+        token = req.headers.authorization.split(" ")[1];
+      } else if (req.cookies.jwt) {
+        token = req.cookies.jwt;
+      }
+      console.log(req.headers, req.cookies["__stripe_mid"]);
+      console.log("TOKEN: ", token, req.cookies.jwt);
 
       let userId;
       try {
         userId = await jwt.verify(token, process.env.JWT_SECRET).id;
       } catch (err) {
-        next(new UnauthorizedError("Your authorization was expired"));
-        return res.status(401).json({message: "Your authorization was expired"});
+        return next(new AppError("Your authorization was expired", 401));
+        // return res
+        //   .status(401)
+        //   .json({ message: "Your authorization was expired" });
       }
 
       const user = await usersModel.findById(userId);
 
       if (!user || user.token !== token) {
-        next(new UnauthorizedError("User not authorized!"));
-        res.status(401).send({message: "User not authorized!!!"});
+        next(new AppError("User not authorized!", 401));
+        // res.status(401).send({ message: "User not authorized!!!" });
       }
       req.user = user;
       req.token = token;
       next();
     } catch (err) {
-      throw new UnauthorizedError("Not authorized!");
+      return next(new AppError("User not authorized!", 401));
+      // next(new UnauthorizedError("User not authorized!"));
+      // res.status(401).send({ message: "User not authorized!!!" });
     }
   }
 
-  static async updateUser(req, res, next){
+  static async updateUser(req, res, next) {
     try {
       const user = await usersModel.findByIdAndUpdate(
         req.body.id,
@@ -158,7 +175,7 @@ module.exports = class UserControllers {
         { new: true }
       );
       if (!user) {
-        return res.status(404).json({message: "user not found"});
+        return res.status(404).json({ message: "user not found" });
       }
       return res.status(200).json({
         id: user._id,
@@ -166,7 +183,7 @@ module.exports = class UserControllers {
         avatarURL: user.avatarURL,
         name: user.name,
         subscription: user.subscription,
-        lang: user.lang
+        lang: user.lang,
       });
     } catch (err) {
       next(err);

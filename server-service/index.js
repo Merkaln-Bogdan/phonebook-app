@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const usersRouter = require("./routers/usersRouter");
 const contactsRouter = require("./routers/contactsRouter");
 const mongoose = require("mongoose");
@@ -13,8 +14,8 @@ module.exports = class UserList {
   async start() {
     this.initServer();
     this.initMiddlewares();
-    this.initContactRoutes();
     this.initUserRoutes();
+    this.initContactRoutes();
     await this.initDataBase();
     this.startListening();
   }
@@ -26,16 +27,19 @@ module.exports = class UserList {
   initMiddlewares() {
     this.server.use(express.json());
     this.server.use(
-      cors({ cors: {
+      cors({
         origin: [
-          "https://merkaln-register-phonebook.netlify.app", 
-          "https://merkaln-register-phonebook.netlify.app/auth/signin", 
+          "https://merkaln-register-phonebook.netlify.app",
+          "https://merkaln-register-phonebook.netlify.app/auth/signin",
           "https://phonebook-api-v2.onrender.com/auth/signin",
-          "http://localhost:3000"
+          "http://localhost:3000",
         ],
-        default: "https://merkaln-register-phonebook.netlify.app"
-      } })
+        default: "https://merkaln-register-phonebook.netlify.app",
+        credentials: true,
+      }),
     );
+
+    this.server.use(cookieParser());
   }
 
   initContactRoutes() {
@@ -55,12 +59,11 @@ module.exports = class UserList {
     try {
       await mongoose.connect(process.env.MONGODB_URL, {
         useNewUrlParser: true,
-        useUnifiedTopology: true
+        useUnifiedTopology: true,
       });
     } catch (err) {
       process.exit(1);
     }
     console.log("Database connection successful");
   }
-
 };
